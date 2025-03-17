@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, Moon, ZapFast, Clock, User, BarChart2, Trophy } from "lucide-react";
+import { Heart, Moon, Zap, Clock, User, BarChart2, Trophy } from "lucide-react";
 import SleepLeaderboard from "@/components/SleepLeaderboard";
 import SleepFeed from "@/components/SleepFeed";
 import SleepTrends from "@/components/SleepTrends";
@@ -105,7 +105,7 @@ const Dashboard = () => {
                       className="bg-secondary/50 p-4 rounded-lg flex flex-col items-center justify-center"
                     >
                       <div className="text-sleep-blue mb-2 p-2 bg-sleep-blue/10 rounded-full">
-                        <ZapFast className="h-6 w-6" />
+                        <Zap className="h-6 w-6" />
                       </div>
                       <span className="text-sm text-muted-foreground">Energy Score</span>
                       <span className="text-3xl font-bold mt-1">
