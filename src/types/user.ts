@@ -8,4 +8,11 @@ export interface User {
   joinedAt: string;
   followers: number;
   following: number;
+  fitbitConnected?: boolean;
+  fitbitCredentials?: {
+    accessToken: string;
+    refreshToken: string;
+    expiresAt: number;
+    userId: string;
+  };
 }

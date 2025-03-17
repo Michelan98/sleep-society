@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,9 +6,11 @@ import { Heart, Moon, Zap, Clock, User, BarChart2, Trophy } from "lucide-react";
 import SleepLeaderboard from "@/components/SleepLeaderboard";
 import SleepFeed from "@/components/SleepFeed";
 import SleepTrends from "@/components/SleepTrends";
+import FitbitConnect from "@/components/FitbitConnect";
 import Navbar from "@/components/Navbar";
 import { userService } from "@/lib/user-service";
 import { sleepService } from "@/lib/sleep-service";
+import { fitbitService } from "@/lib/fitbit-service";
 import { User as UserType } from "@/types/user";
 import { SleepData } from "@/types/sleep";
 
@@ -21,7 +22,6 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // In a real app, these would be API calls
         const userData = await userService.getCurrentUser();
         const sleepData = await sleepService.getLatestSleepData();
         
@@ -36,6 +36,10 @@ const Dashboard = () => {
 
     fetchData();
   }, []);
+
+  const handleFitbitConnect = (updatedUser: UserType) => {
+    setUser(updatedUser);
+  };
 
   if (isLoading) {
     return (
@@ -142,6 +146,14 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
+              <FitbitConnect user={user} onConnect={handleFitbitConnect} />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
               <Card className="border border-border/50 shadow-md">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xl flex items-center">
@@ -158,7 +170,7 @@ const Dashboard = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
             >
               <Card className="border border-border/50 shadow-md">
                 <CardHeader className="pb-2">
