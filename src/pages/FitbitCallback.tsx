@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Loader2, AlertTriangle, CheckCircle } from "lucide-react";
 import { fitbitService } from "@/lib/fitbit-service";
 import { userService } from "@/lib/user-service";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const FitbitCallback = () => {
@@ -21,6 +21,7 @@ const FitbitCallback = () => {
         const urlParams = new URLSearchParams(location.search);
         const code = urlParams.get("code");
         const error = urlParams.get("error");
+        const state = urlParams.get("state");
         const isMock = urlParams.get("mock") === "true";
 
         if (error) {
@@ -29,6 +30,11 @@ const FitbitCallback = () => {
 
         if (!code) {
           throw new Error("No authorization code found in the URL");
+        }
+
+        // Validate state to prevent CSRF attacks (skip for mock)
+        if (!isMock && state && !fitbitService.validateState(state)) {
+          throw new Error("Invalid state parameter - possible CSRF attack");
         }
 
         console.log("Exchanging code for token...");

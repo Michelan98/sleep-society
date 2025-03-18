@@ -27,9 +27,9 @@ export interface FitbitSleepData {
     };
     data: Array<{
       level: 'deep' | 'light' | 'rem' | 'wake';
-      startTime: string;
-      endTime: string;
-      seconds: number;
+      startTime?: string;
+      endTime?: string;
+      seconds?: number;
     }>;
   };
 }
@@ -42,3 +42,20 @@ export interface FitbitSleepResponse {
     totalSleepRecords: number;
   };
 }
+
+// Scopes available for Fitbit API
+export type FitbitScope = 
+  | "activity" 
+  | "cardio_fitness"
+  | "electrocardiogram"
+  | "heartrate"
+  | "location"
+  | "nutrition"
+  | "oxygen_saturation"
+  | "profile"
+  | "respiratory_rate"
+  | "settings"
+  | "sleep"
+  | "social"
+  | "temperature"
+  | "weight";

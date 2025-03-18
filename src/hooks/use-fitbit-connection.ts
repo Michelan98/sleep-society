@@ -21,7 +21,8 @@ export function useFitbitConnection({
 
   useEffect(() => {
     // Get the last sync time when the component mounts
-    setLastSyncTime(fitbitService.getLastSyncTime());
+    const storedSyncTime = fitbitService.getLastSyncTime();
+    setLastSyncTime(storedSyncTime);
 
     // Check if we need to sync data based on the last sync time
     if (user?.fitbitConnected && fitbitService.shouldSync()) {
