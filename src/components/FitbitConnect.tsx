@@ -1,21 +1,44 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { User } from "@/types/user";
 import { fitbitService } from "@/lib/fitbit-service";
 import { userService } from "@/lib/user-service";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2, Activity } from "lucide-react";
+import { Loader2, Activity, RefreshCw } from "lucide-react";
+import { format } from "date-fns";
 
 interface FitbitConnectProps {
   user: User | null;
   onConnect: (updatedUser: User) => void;
+  onDataRefresh?: () => void;
 }
 
-const FitbitConnect = ({ user, onConnect }: FitbitConnectProps) => {
+const FitbitConnect = ({ user, onConnect, onDataRefresh }: FitbitConnectProps) => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    // Get the last sync time when the component mounts
+    setLastSyncTime(fitbitService.getLastSyncTime());
+
+    // Check if we need to sync data based on the last sync time
+    if (user?.fitbitConnected && fitbitService.shouldSync()) {
+      handleSyncData();
+    }
+    
+    // Set up a daily check for sync
+    const dailyCheckInterval = setInterval(() => {
+      if (user?.fitbitConnected && fitbitService.shouldSync()) {
+        handleSyncData();
+      }
+    }, 3600000); // Check every hour if a sync is needed
+    
+    return () => clearInterval(dailyCheckInterval);
+  }, [user?.fitbitConnected]);
 
   const handleConnect = () => {
     try {
@@ -31,6 +54,37 @@ const FitbitConnect = ({ user, onConnect }: FitbitConnectProps) => {
         description: "Failed to initiate Fitbit connection. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleSyncData = async () => {
+    if (!user?.fitbitConnected) return;
+    
+    setIsSyncing(true);
+    try {
+      const sleepData = await fitbitService.getSleepData();
+      
+      if (sleepData) {
+        setLastSyncTime(fitbitService.getLastSyncTime());
+        
+        toast({
+          title: "Data Synced",
+          description: "Your Fitbit sleep data has been updated.",
+        });
+        
+        if (onDataRefresh) {
+          onDataRefresh();
+        }
+      }
+    } catch (error) {
+      console.error("Error syncing Fitbit data:", error);
+      toast({
+        title: "Sync Error",
+        description: "Failed to sync data from Fitbit. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -90,7 +144,7 @@ const FitbitConnect = ({ user, onConnect }: FitbitConnectProps) => {
               Your Fitbit account is connected. Your sleep data will be automatically synced.
             </p>
             <p className="text-xs text-muted-foreground">
-              Last synced: {new Date().toLocaleDateString()}
+              Last synced: {lastSyncTime ? format(lastSyncTime, 'PPp') : 'Not yet synced'}
             </p>
           </div>
         ) : (
@@ -104,23 +158,43 @@ const FitbitConnect = ({ user, onConnect }: FitbitConnectProps) => {
           </div>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col space-y-2">
         {user.fitbitConnected ? (
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={handleDisconnect}
-            disabled={isDisconnecting}
-          >
-            {isDisconnecting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Disconnecting...
-              </>
-            ) : (
-              "Disconnect Fitbit"
-            )}
-          </Button>
+          <>
+            <Button 
+              variant="default" 
+              className="w-full bg-sleep-blue hover:bg-sleep-blue/90"
+              onClick={handleSyncData}
+              disabled={isSyncing}
+            >
+              {isSyncing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Syncing Data...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Sync Now
+                </>
+              )}
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleDisconnect}
+              disabled={isDisconnecting}
+            >
+              {isDisconnecting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Disconnecting...
+                </>
+              ) : (
+                "Disconnect Fitbit"
+              )}
+            </Button>
+          </>
         ) : (
           <Button 
             className="w-full bg-sleep-purple hover:bg-sleep-purple/90"

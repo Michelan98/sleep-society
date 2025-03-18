@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,26 +20,53 @@ const Dashboard = () => {
   const [sleepData, setSleepData] = useState<SleepData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userData = await userService.getCurrentUser();
-        const sleepData = await sleepService.getLatestSleepData();
-        
-        setUser(userData);
-        setSleepData(sleepData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
+  const fetchData = async () => {
+    try {
+      const userData = await userService.getCurrentUser();
+      
+      let sleepData;
+      
+      // If user has Fitbit connected, try to get data from there
+      if (userData.fitbitConnected) {
+        console.log("Fetching sleep data from Fitbit");
+        sleepData = await fitbitService.getSleepData();
       }
-    };
+      
+      // If no Fitbit data or not connected, fallback to regular sleep data
+      if (!sleepData) {
+        console.log("Falling back to regular sleep data");
+        sleepData = await sleepService.getLatestSleepData();
+      }
+      
+      setUser(userData);
+      setSleepData(sleepData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load your sleep data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
   const handleFitbitConnect = (updatedUser: UserType) => {
     setUser(updatedUser);
+    
+    // If the user disconnected Fitbit, we should refresh the sleep data
+    if (!updatedUser.fitbitConnected) {
+      fetchData();
+    }
+  };
+
+  const handleDataRefresh = () => {
+    fetchData();
   };
 
   if (isLoading) {
@@ -74,6 +102,11 @@ const Dashboard = () => {
                   <CardTitle className="text-2xl flex items-center">
                     <User className="h-5 w-5 mr-2 text-sleep-purple" />
                     Your Sleep Summary
+                    {user?.fitbitConnected && (
+                      <span className="ml-2 text-xs bg-sleep-purple/10 text-sleep-purple px-2 py-1 rounded-full">
+                        Fitbit
+                      </span>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -146,7 +179,11 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <FitbitConnect user={user} onConnect={handleFitbitConnect} />
+              <FitbitConnect 
+                user={user} 
+                onConnect={handleFitbitConnect}
+                onDataRefresh={handleDataRefresh}
+              />
             </motion.div>
 
             <motion.div

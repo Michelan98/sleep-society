@@ -19,6 +19,9 @@ const mockSleepData: SleepData = {
   note: "Slept well with Fitbit tracking",
 };
 
+// Store the last sync time
+let lastSyncTime: Date | null = null;
+
 // In a real app, these would point to actual backend endpoints
 // For demo purposes, we're implementing client-side mocks
 class FitbitService {
@@ -66,6 +69,9 @@ class FitbitService {
       // In a demo app, return mock data
       console.log(`Mock Fitbit API: Fetching sleep data for ${date}`);
       
+      // Update last sync time
+      lastSyncTime = new Date();
+      
       // Return mock data with the requested date
       return {
         ...mockSleepData,
@@ -82,12 +88,31 @@ class FitbitService {
     }
   }
 
+  getLastSyncTime(): Date | null {
+    return lastSyncTime;
+  }
+
+  shouldSync(): boolean {
+    if (!lastSyncTime) return true;
+    
+    const now = new Date();
+    const lastSync = new Date(lastSyncTime);
+    
+    // Check if the last sync was yesterday or earlier
+    return (
+      lastSync.getDate() !== now.getDate() ||
+      lastSync.getMonth() !== now.getMonth() ||
+      lastSync.getFullYear() !== now.getFullYear()
+    );
+  }
+
   async disconnectFitbit(): Promise<boolean> {
     try {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 600));
       
       console.log("Mock Fitbit API: Disconnecting Fitbit account");
+      lastSyncTime = null;
       return true;
     } catch (error) {
       console.error("Error disconnecting Fitbit:", error);
