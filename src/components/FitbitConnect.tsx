@@ -28,11 +28,10 @@ const FitbitConnect = ({ user, onConnect }: FitbitConnectProps) => {
     
     setIsDisconnecting(true);
     try {
-      const success = await fitbitService.disconnectFitbit(user.id);
+      const success = await fitbitService.disconnectFitbit();
       if (success) {
         const updatedUser = await userService.updateUserProfile({
-          fitbitConnected: false,
-          fitbitCredentials: undefined
+          fitbitConnected: false
         });
         
         onConnect(updatedUser);

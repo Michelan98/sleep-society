@@ -27,20 +27,17 @@ const FitbitCallback = () => {
           throw new Error("No authorization code found in the URL");
         }
 
-        // Exchange the code for access token
+        // Exchange the code for access token via server-side endpoint
         const credentials = await fitbitService.exchangeCodeForToken(code);
         if (!credentials) {
           throw new Error("Failed to obtain access token");
         }
 
-        // Update user's profile with Fitbit credentials
-        const updatedUser = await userService.updateUserProfile({
-          fitbitConnected: true,
-          fitbitCredentials: credentials
+        // Update user's profile to indicate Fitbit is connected
+        // No need to store credentials client-side anymore
+        await userService.updateUserProfile({
+          fitbitConnected: true
         });
-
-        // Fetch initial sleep data
-        const sleepData = await fitbitService.getSleepData(credentials);
 
         toast({
           title: "Fitbit Connected",
