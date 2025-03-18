@@ -1,84 +1,17 @@
 
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, Moon, Zap, Clock, User, BarChart2, Trophy } from "lucide-react";
-import SleepLeaderboard from "@/components/SleepLeaderboard";
-import SleepFeed from "@/components/SleepFeed";
-import SleepTrends from "@/components/SleepTrends";
-import FitbitConnect from "@/components/FitbitConnect";
 import Navbar from "@/components/Navbar";
-import { userService } from "@/lib/user-service";
-import { sleepService } from "@/lib/sleep-service";
-import { fitbitService } from "@/lib/fitbit-service";
-import { User as UserType } from "@/types/user";
-import { SleepData } from "@/types/sleep";
-import { toast } from "@/hooks/use-toast";
+import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
+import SleepSummary from "@/components/dashboard/SleepSummary";
+import SleepFeedCard from "@/components/dashboard/SleepFeedCard";
+import SidebarCards from "@/components/dashboard/SidebarCards";
+import { useDashboardData } from "@/hooks/use-dashboard-data";
 
 const Dashboard = () => {
-  const [user, setUser] = useState<UserType | null>(null);
-  const [sleepData, setSleepData] = useState<SleepData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchData = async () => {
-    try {
-      const userData = await userService.getCurrentUser();
-      
-      let sleepData;
-      
-      // If user has Fitbit connected, try to get data from there
-      if (userData.fitbitConnected) {
-        console.log("Fetching sleep data from Fitbit");
-        sleepData = await fitbitService.getSleepData();
-      }
-      
-      // If no Fitbit data or not connected, fallback to regular sleep data
-      if (!sleepData) {
-        console.log("Falling back to regular sleep data");
-        sleepData = await sleepService.getLatestSleepData();
-      }
-      
-      setUser(userData);
-      setSleepData(sleepData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load your sleep data. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleFitbitConnect = (updatedUser: UserType) => {
-    setUser(updatedUser);
-    
-    // If the user disconnected Fitbit, we should refresh the sleep data
-    if (!updatedUser.fitbitConnected) {
-      fetchData();
-    }
-  };
-
-  const handleDataRefresh = () => {
-    fetchData();
-  };
+  const { user, sleepData, isLoading, fetchData, handleFitbitConnect } = useDashboardData();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <Moon className="h-12 w-12 text-sleep-purple animate-pulse-gentle mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your sleep data...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (
@@ -93,136 +26,18 @@ const Dashboard = () => {
           className="grid grid-cols-1 lg:grid-cols-3 gap-6"
         >
           <div className="lg:col-span-2 space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <Card className="border border-border/50 shadow-md overflow-hidden">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-2xl flex items-center">
-                    <User className="h-5 w-5 mr-2 text-sleep-purple" />
-                    Your Sleep Summary
-                    {user?.fitbitConnected && (
-                      <span className="ml-2 text-xs bg-sleep-purple/10 text-sleep-purple px-2 py-1 rounded-full">
-                        Fitbit
-                      </span>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <motion.div 
-                      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                      className="bg-secondary/50 p-4 rounded-lg flex flex-col items-center justify-center"
-                    >
-                      <div className="text-sleep-purple mb-2 p-2 bg-sleep-purple/10 rounded-full">
-                        <Clock className="h-6 w-6" />
-                      </div>
-                      <span className="text-sm text-muted-foreground">Sleep Duration</span>
-                      <span className="text-3xl font-bold mt-1">
-                        {sleepData?.duration || "7h 32m"}
-                      </span>
-                    </motion.div>
-                    
-                    <motion.div 
-                      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                      className="bg-secondary/50 p-4 rounded-lg flex flex-col items-center justify-center"
-                    >
-                      <div className="text-sleep-purple mb-2 p-2 bg-sleep-purple/10 rounded-full">
-                        <Moon className="h-6 w-6" />
-                      </div>
-                      <span className="text-sm text-muted-foreground">Sleep Quality</span>
-                      <span className="text-3xl font-bold mt-1">
-                        {sleepData?.quality || "86%"}
-                      </span>
-                    </motion.div>
-                    
-                    <motion.div 
-                      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                      className="bg-secondary/50 p-4 rounded-lg flex flex-col items-center justify-center"
-                    >
-                      <div className="text-sleep-blue mb-2 p-2 bg-sleep-blue/10 rounded-full">
-                        <Zap className="h-6 w-6" />
-                      </div>
-                      <span className="text-sm text-muted-foreground">Energy Score</span>
-                      <span className="text-3xl font-bold mt-1">
-                        {sleepData?.energyScore || "92"}
-                      </span>
-                    </motion.div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Card className="border border-border/50 shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-2xl flex items-center">
-                    <Heart className="h-5 w-5 mr-2 text-sleep-purple" /> 
-                    Sleep Feed
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <SleepFeed />
-                </CardContent>
-              </Card>
-            </motion.div>
+            <SleepSummary 
+              sleepData={sleepData} 
+              isFitbitConnected={user?.fitbitConnected} 
+            />
+            <SleepFeedCard />
           </div>
           
-          <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <FitbitConnect 
-                user={user} 
-                onConnect={handleFitbitConnect}
-                onDataRefresh={handleDataRefresh}
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <Card className="border border-border/50 shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xl flex items-center">
-                    <Trophy className="h-5 w-5 mr-2 text-sleep-gold" />
-                    Weekly Leaders
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <SleepLeaderboard />
-                </CardContent>
-              </Card>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-            >
-              <Card className="border border-border/50 shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xl flex items-center">
-                    <BarChart2 className="h-5 w-5 mr-2 text-sleep-blue" />
-                    Sleep Trends
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <SleepTrends />
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+          <SidebarCards 
+            user={user} 
+            onFitbitConnect={handleFitbitConnect}
+            onDataRefresh={fetchData}
+          />
         </motion.div>
       </div>
     </div>
