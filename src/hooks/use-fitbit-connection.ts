@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { User } from "@/types/user";
-import { fitbitService } from "@/lib/fitbit-service";
+import { fitbitService } from "@/lib/fitbit"; // Updated import path
 import { userService } from "@/lib/user-service";
 import { toast } from "@/hooks/use-toast";
 

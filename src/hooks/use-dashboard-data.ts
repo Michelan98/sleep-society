@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { userService } from "@/lib/user-service";
 import { sleepService } from "@/lib/sleep-service";
-import { fitbitService } from "@/lib/fitbit-service";
+import { fitbitService } from "@/lib/fitbit"; // Updated import path
 import { User } from "@/types/user";
 import { SleepData } from "@/types/sleep";
 import { toast } from "@/hooks/use-toast";

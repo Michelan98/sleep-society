@@ -8,7 +8,7 @@ import SleepFeedCard from "@/components/dashboard/SleepFeedCard";
 import { toast } from "@/hooks/use-toast";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
-import { fitbitService } from "@/lib/fitbit-service";
+import { fitbitService } from "@/lib/fitbit"; // Updated import path
 import { userService } from "@/lib/user-service";
 
 const Dashboard = () => {
