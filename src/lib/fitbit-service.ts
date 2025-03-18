@@ -1,4 +1,3 @@
-
 import { FitbitCredentials, FitbitSleepResponse } from "@/types/fitbit";
 import { SleepData } from "@/types/sleep";
 import { toast } from "@/hooks/use-toast";
@@ -7,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 const FITBIT_CLIENT_ID = "23Q4N8"; // From the image shared
 const FITBIT_AUTH_URL = "https://www.fitbit.com/oauth2/authorize";
 const FITBIT_TOKEN_URL = "https://api.fitbit.com/oauth2/token";
-const REDIRECT_URI = "https://sleep-society.lovable.app/fitbit-callback"; // From the image shared
+const REDIRECT_URI = "https://sleep-society.lovable.app/dashboard"; // Updated redirect URI
 
 // Store the last sync time
 let lastSyncTime: Date | null = null;
