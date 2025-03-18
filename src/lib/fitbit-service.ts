@@ -5,15 +5,18 @@ import { toast } from "@/components/ui/use-toast";
 
 // Mock data to simulate Fitbit sleep data
 const mockSleepData: SleepData = {
+  id: "mock-sleep-id",
+  userId: "mock-user-id",
   date: new Date().toISOString(),
   duration: "7h 45m",
   quality: "92%",
-  deepSleep: "1h 32m",
-  remSleep: "1h 58m",
-  lightSleep: "4h 15m",
-  awake: "12m",
   energyScore: "95",
-  source: "Fitbit",
+  deepSleepPercentage: 20,
+  remSleepPercentage: 25,
+  lightSleepPercentage: 55,
+  awakeTime: 12,
+  heartRateAvg: 62,
+  note: "Slept well with Fitbit tracking",
 };
 
 // In a real app, these would point to actual backend endpoints
@@ -35,10 +38,10 @@ class FitbitService {
       if (code === "mock_auth_code") {
         console.log("Mock Fitbit auth flow: Successfully exchanged code for token");
         return {
-          access_token: "mock_access_token",
-          user_id: "mock_user_id",
-          expires_in: 28800,
-          scope: "sleep activity",
+          accessToken: "mock_access_token",
+          refreshToken: "mock_refresh_token",
+          expiresAt: Date.now() + 28800000,
+          userId: "mock_user_id",
         };
       }
       
