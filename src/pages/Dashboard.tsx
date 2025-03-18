@@ -8,7 +8,7 @@ import SidebarCards from "@/components/dashboard/SidebarCards";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 
 const Dashboard = () => {
-  const { user, sleepData, isLoading, fetchData, handleFitbitConnect } = useDashboardData();
+  const { user, sleepData, isLoading, fetchData, handleFitbitConnect, dataSource } = useDashboardData();
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -28,7 +28,7 @@ const Dashboard = () => {
           <div className="lg:col-span-2 space-y-6">
             <SleepSummary 
               sleepData={sleepData} 
-              isFitbitConnected={user?.fitbitConnected} 
+              isFitbitConnected={dataSource === "fitbit"} 
             />
             <SleepFeedCard />
           </div>

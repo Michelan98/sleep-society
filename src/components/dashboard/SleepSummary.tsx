@@ -10,6 +10,13 @@ interface SleepSummaryProps {
 }
 
 const SleepSummary = ({ sleepData, isFitbitConnected }: SleepSummaryProps) => {
+  // Format the data for display, with fallbacks if data is missing
+  const displayData = {
+    duration: sleepData?.duration || "0h 0m",
+    quality: sleepData?.quality || "0%",
+    energyScore: sleepData?.energyScore || "0"
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -39,7 +46,7 @@ const SleepSummary = ({ sleepData, isFitbitConnected }: SleepSummaryProps) => {
               </div>
               <span className="text-sm text-muted-foreground">Sleep Duration</span>
               <span className="text-3xl font-bold mt-1">
-                {sleepData?.duration || "7h 32m"}
+                {displayData.duration}
               </span>
             </motion.div>
             
@@ -52,7 +59,7 @@ const SleepSummary = ({ sleepData, isFitbitConnected }: SleepSummaryProps) => {
               </div>
               <span className="text-sm text-muted-foreground">Sleep Quality</span>
               <span className="text-3xl font-bold mt-1">
-                {sleepData?.quality || "86%"}
+                {displayData.quality}
               </span>
             </motion.div>
             
@@ -65,7 +72,7 @@ const SleepSummary = ({ sleepData, isFitbitConnected }: SleepSummaryProps) => {
               </div>
               <span className="text-sm text-muted-foreground">Energy Score</span>
               <span className="text-3xl font-bold mt-1">
-                {sleepData?.energyScore || "92"}
+                {displayData.energyScore}
               </span>
             </motion.div>
           </div>

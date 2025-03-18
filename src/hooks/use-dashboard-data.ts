@@ -11,6 +11,7 @@ export const useDashboardData = () => {
   const [user, setUser] = useState<User | null>(null);
   const [sleepData, setSleepData] = useState<SleepData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [dataSource, setDataSource] = useState<"fitbit" | "internal" | null>(null);
 
   // Fetch user data from the appropriate service
   const fetchUserData = useCallback(async (): Promise<User> => {
@@ -18,22 +19,29 @@ export const useDashboardData = () => {
   }, []);
 
   // Fetch sleep data with fallback strategy
-  const fetchSleepData = useCallback(async (userData: User): Promise<SleepData | null> => {
+  const fetchSleepData = useCallback(async (userData: User): Promise<{data: SleepData | null, source: "fitbit" | "internal" | null}> => {
     let sleepData = null;
+    let source: "fitbit" | "internal" | null = null;
     
     // If user has Fitbit connected, try to get data from there
     if (userData.fitbitConnected) {
       console.log("Fetching sleep data from Fitbit");
       sleepData = await fitbitService.getSleepData();
+      if (sleepData) {
+        source = "fitbit";
+      }
     }
     
     // If no Fitbit data or not connected, fallback to regular sleep data
     if (!sleepData) {
       console.log("Falling back to regular sleep data");
       sleepData = await sleepService.getLatestSleepData();
+      if (sleepData) {
+        source = "internal";
+      }
     }
     
-    return sleepData;
+    return { data: sleepData, source };
   }, []);
 
   // Main data fetching function 
@@ -41,10 +49,11 @@ export const useDashboardData = () => {
     try {
       setIsLoading(true);
       const userData = await fetchUserData();
-      const sleepData = await fetchSleepData(userData);
+      const { data, source } = await fetchSleepData(userData);
       
       setUser(userData);
-      setSleepData(sleepData);
+      setSleepData(data);
+      setDataSource(source);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast({
@@ -77,6 +86,7 @@ export const useDashboardData = () => {
     sleepData,
     isLoading,
     fetchData,
-    handleFitbitConnect
+    handleFitbitConnect,
+    dataSource
   };
 };
