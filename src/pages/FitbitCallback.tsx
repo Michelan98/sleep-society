@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Loader2, AlertTriangle, CheckCircle } from "lucide-react";
 import { fitbitService } from "@/lib/fitbit-service";
 import { userService } from "@/lib/user-service";
@@ -12,14 +12,16 @@ const FitbitCallback = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const processCallback = async () => {
       try {
         // Get the auth code from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
+        const urlParams = new URLSearchParams(location.search);
         const code = urlParams.get("code");
         const error = urlParams.get("error");
+        const isMock = urlParams.get("mock") === "true";
 
         if (error) {
           throw new Error(`Authorization error: ${error}`);
@@ -31,13 +33,13 @@ const FitbitCallback = () => {
 
         console.log("Exchanging code for token...");
         
-        // Exchange the code for access token via server-side endpoint
+        // Exchange the code for access token
         const credentials = await fitbitService.exchangeCodeForToken(code);
         if (!credentials) {
           throw new Error("Failed to obtain access token");
         }
 
-        console.log("Successfully obtained credentials");
+        console.log("Successfully obtained credentials", isMock ? "(mock)" : "");
 
         // Update user's profile to indicate Fitbit is connected
         await userService.updateUserProfile({
@@ -76,7 +78,7 @@ const FitbitCallback = () => {
     };
 
     processCallback();
-  }, [navigate]);
+  }, [navigate, location.search]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

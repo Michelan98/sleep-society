@@ -3,39 +3,46 @@ import { FitbitCredentials, FitbitSleepResponse } from "@/types/fitbit";
 import { SleepData } from "@/types/sleep";
 import { toast } from "@/components/ui/use-toast";
 
-// Server-side endpoint URLs
-const API_BASE_URL = "/api"; // This points to your backend API
-const REDIRECT_URI = window.location.origin + "/fitbit-callback";
+// Mock data to simulate Fitbit sleep data
+const mockSleepData: SleepData = {
+  date: new Date().toISOString(),
+  duration: "7h 45m",
+  quality: "92%",
+  deepSleep: "1h 32m",
+  remSleep: "1h 58m",
+  lightSleep: "4h 15m",
+  awake: "12m",
+  energyScore: "95",
+  source: "Fitbit",
+};
 
+// In a real app, these would point to actual backend endpoints
+// For demo purposes, we're implementing client-side mocks
 class FitbitService {
   // Auth utilities
   getAuthUrl(): string {
-    // This redirects to a server-side endpoint that initiates the OAuth flow
-    return `${API_BASE_URL}/fitbit/authorize?redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+    // In a real app, this would redirect to your backend endpoint
+    // For demo, we'll simulate the flow by redirecting directly to our callback
+    return `/fitbit-callback?code=mock_auth_code&mock=true`;
   }
 
   async exchangeCodeForToken(code: string): Promise<FitbitCredentials | null> {
     try {
-      // Call to server-side endpoint to handle the token exchange
-      const response = await fetch(`${API_BASE_URL}/fitbit/token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ code, redirect_uri: REDIRECT_URI }),
-        credentials: "include", // Important to include cookies for auth
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Token exchange error:", errorData);
-        throw new Error(`Failed to exchange code for token: ${response.status}`);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // For demo purposes, return mock credentials
+      if (code === "mock_auth_code") {
+        console.log("Mock Fitbit auth flow: Successfully exchanged code for token");
+        return {
+          access_token: "mock_access_token",
+          user_id: "mock_user_id",
+          expires_in: 28800,
+          scope: "sleep activity",
+        };
       }
-
-      // Server handles storing the refresh token securely
-      // and only sends back what the client needs to know
-      const credentials = await response.json();
-      return credentials;
+      
+      throw new Error("Invalid authorization code");
     } catch (error) {
       console.error("Error exchanging code for token:", error);
       toast({
@@ -50,28 +57,17 @@ class FitbitService {
   // Data fetching
   async getSleepData(date: string = 'today'): Promise<SleepData | null> {
     try {
-      // Server handles token validation and refreshing
-      const response = await fetch(`${API_BASE_URL}/fitbit/sleep?date=${date}`, {
-        credentials: "include", // Important to include cookies for auth
-      });
-
-      if (!response.ok) {
-        // Handle unauthorized errors
-        if (response.status === 401) {
-          toast({
-            title: "Authentication Error",
-            description: "Your Fitbit connection needs to be renewed.",
-            variant: "destructive",
-          });
-          return null;
-        }
-        
-        const errorText = await response.text().catch(() => "Unknown error");
-        throw new Error(`Failed to fetch sleep data: ${response.status} - ${errorText}`);
-      }
-
-      const sleepData = await response.json();
-      return sleepData;
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // In a demo app, return mock data
+      console.log(`Mock Fitbit API: Fetching sleep data for ${date}`);
+      
+      // Return mock data with the requested date
+      return {
+        ...mockSleepData,
+        date: date === 'today' ? new Date().toISOString() : new Date(date).toISOString(),
+      };
     } catch (error) {
       console.error("Error fetching sleep data:", error);
       toast({
@@ -85,16 +81,10 @@ class FitbitService {
 
   async disconnectFitbit(): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/fitbit/disconnect`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => "Unknown error");
-        throw new Error(`Failed to disconnect Fitbit: ${response.status} - ${errorText}`);
-      }
-
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
+      console.log("Mock Fitbit API: Disconnecting Fitbit account");
       return true;
     } catch (error) {
       console.error("Error disconnecting Fitbit:", error);
