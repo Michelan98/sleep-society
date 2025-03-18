@@ -3,8 +3,13 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import SleepFeed from "@/components/SleepFeed";
+import { User } from "@/types/user";
 
-const SleepFeedCard = () => {
+interface SleepFeedCardProps {
+  user?: User | null;
+}
+
+const SleepFeedCard = ({ user }: SleepFeedCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

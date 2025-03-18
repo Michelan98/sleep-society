@@ -6,10 +6,11 @@ import { SleepData } from "@/types/sleep";
 
 interface SleepSummaryProps {
   sleepData: SleepData | null;
-  isFitbitConnected?: boolean;
+  userName?: string;
+  isFitbitData?: boolean;
 }
 
-const SleepSummary = ({ sleepData, isFitbitConnected }: SleepSummaryProps) => {
+const SleepSummary = ({ sleepData, userName = "User", isFitbitData }: SleepSummaryProps) => {
   // Format the data for display, with fallbacks if data is missing
   const displayData = {
     duration: sleepData?.duration || "0h 0m",
@@ -28,7 +29,7 @@ const SleepSummary = ({ sleepData, isFitbitConnected }: SleepSummaryProps) => {
           <CardTitle className="text-2xl flex items-center">
             <User className="h-5 w-5 mr-2 text-sleep-purple" />
             Your Sleep Summary
-            {isFitbitConnected && (
+            {isFitbitData && (
               <span className="ml-2 text-xs bg-sleep-purple/10 text-sleep-purple px-2 py-1 rounded-full">
                 Fitbit
               </span>

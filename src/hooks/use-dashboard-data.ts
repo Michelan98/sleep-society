@@ -66,14 +66,14 @@ export const useDashboardData = () => {
     }
   }, [fetchUserData, fetchSleepData]);
 
-  // Handle Fitbit connection status change
-  const handleFitbitConnect = useCallback((updatedUser: User) => {
+  // Update user function
+  const updateUser = useCallback((updatedUser: User) => {
     setUser(updatedUser);
-    
-    // If the user disconnected Fitbit, we should refresh the sleep data
-    if (!updatedUser.fitbitConnected) {
-      fetchData();
-    }
+  }, []);
+
+  // Refetch data function - alias for fetchData to maintain compatibility
+  const refetchData = useCallback(() => {
+    return fetchData();
   }, [fetchData]);
 
   // Initial data fetch on component mount
@@ -86,7 +86,9 @@ export const useDashboardData = () => {
     sleepData,
     isLoading,
     fetchData,
-    handleFitbitConnect,
-    dataSource
+    refetchData,
+    updateUser,
+    dataSource,
+    handleFitbitConnect: updateUser
   };
 };

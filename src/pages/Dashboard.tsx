@@ -12,7 +12,7 @@ import { fitbitService } from "@/lib/fitbit-service";
 import { userService } from "@/lib/user-service";
 
 const Dashboard = () => {
-  const { user, sleepData, isLoading, refetchData, updateUser, dataSource } = useDashboardData();
+  const { user, sleepData, isLoading, fetchData, refetchData, updateUser, dataSource } = useDashboardData();
   const location = useLocation();
 
   useEffect(() => {
@@ -88,7 +88,7 @@ const Dashboard = () => {
         <div className="w-full lg:w-3/4 space-y-6">
           <SleepSummary 
             sleepData={sleepData} 
-            userName={user?.name || "User"} 
+            userName={user?.name} 
             isFitbitData={isFitbitData}
           />
           <SleepFeedCard user={user} />
