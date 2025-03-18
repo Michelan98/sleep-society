@@ -14,6 +14,7 @@ import { sleepService } from "@/lib/sleep-service";
 import { fitbitService } from "@/lib/fitbit-service";
 import { User as UserType } from "@/types/user";
 import { SleepData } from "@/types/sleep";
+import { toast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const [user, setUser] = useState<UserType | null>(null);
