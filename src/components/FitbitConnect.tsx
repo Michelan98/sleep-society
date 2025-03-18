@@ -18,9 +18,20 @@ const FitbitConnect = ({ user, onConnect }: FitbitConnectProps) => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   const handleConnect = () => {
-    setIsConnecting(true);
-    const authUrl = fitbitService.getAuthUrl();
-    window.location.href = authUrl;
+    try {
+      setIsConnecting(true);
+      const authUrl = fitbitService.getAuthUrl();
+      console.log("Redirecting to Fitbit auth URL:", authUrl);
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error("Error initiating Fitbit connection:", error);
+      setIsConnecting(false);
+      toast({
+        title: "Connection Error",
+        description: "Failed to initiate Fitbit connection. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDisconnect = async () => {
@@ -28,8 +39,11 @@ const FitbitConnect = ({ user, onConnect }: FitbitConnectProps) => {
     
     setIsDisconnecting(true);
     try {
+      console.log("Disconnecting Fitbit...");
       const success = await fitbitService.disconnectFitbit();
+      
       if (success) {
+        console.log("Successfully disconnected from Fitbit");
         const updatedUser = await userService.updateUserProfile({
           fitbitConnected: false
         });
@@ -75,11 +89,17 @@ const FitbitConnect = ({ user, onConnect }: FitbitConnectProps) => {
             <p className="text-sm mb-2">
               Your Fitbit account is connected. Your sleep data will be automatically synced.
             </p>
+            <p className="text-xs text-muted-foreground">
+              Last synced: {new Date().toLocaleDateString()}
+            </p>
           </div>
         ) : (
           <div className="bg-secondary/50 p-4 rounded-lg">
             <p className="text-sm mb-2">
               Connect your Fitbit account to automatically import your sleep data into SleepSync.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              We'll securely handle your Fitbit authentication.
             </p>
           </div>
         )}

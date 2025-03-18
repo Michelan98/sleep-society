@@ -4,19 +4,19 @@ import { SleepData } from "@/types/sleep";
 import { toast } from "@/components/ui/use-toast";
 
 // Server-side endpoint URLs
-const API_BASE_URL = "/api"; // This would point to your backend API
+const API_BASE_URL = "/api"; // This points to your backend API
 const REDIRECT_URI = window.location.origin + "/fitbit-callback";
 
 class FitbitService {
   // Auth utilities
   getAuthUrl(): string {
-    // This will now redirect to a server-side endpoint that initiates the OAuth flow
+    // This redirects to a server-side endpoint that initiates the OAuth flow
     return `${API_BASE_URL}/fitbit/authorize?redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
   }
 
   async exchangeCodeForToken(code: string): Promise<FitbitCredentials | null> {
     try {
-      // Now making a call to server-side endpoint to handle the token exchange
+      // Call to server-side endpoint to handle the token exchange
       const response = await fetch(`${API_BASE_URL}/fitbit/token`, {
         method: "POST",
         headers: {
@@ -27,26 +27,25 @@ class FitbitService {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to exchange code for token");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Token exchange error:", errorData);
+        throw new Error(`Failed to exchange code for token: ${response.status}`);
       }
 
-      // Server will handle storing the refresh token securely
-      // and only send back what the client needs to know
+      // Server handles storing the refresh token securely
+      // and only sends back what the client needs to know
       const credentials = await response.json();
       return credentials;
     } catch (error) {
       console.error("Error exchanging code for token:", error);
       toast({
-        title: "Error",
+        title: "Authentication Error",
         description: "Failed to connect to Fitbit. Please try again.",
         variant: "destructive",
       });
       return null;
     }
   }
-
-  // We no longer need to store refresh tokens on the client
-  // or implement token refresh logic here, as that's handled server-side
 
   // Data fetching
   async getSleepData(date: string = 'today'): Promise<SleepData | null> {
@@ -57,7 +56,7 @@ class FitbitService {
       });
 
       if (!response.ok) {
-        // If unauthorized, could redirect to reconnect Fitbit
+        // Handle unauthorized errors
         if (response.status === 401) {
           toast({
             title: "Authentication Error",
@@ -66,7 +65,9 @@ class FitbitService {
           });
           return null;
         }
-        throw new Error("Failed to fetch sleep data");
+        
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new Error(`Failed to fetch sleep data: ${response.status} - ${errorText}`);
       }
 
       const sleepData = await response.json();
@@ -90,12 +91,18 @@ class FitbitService {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to disconnect Fitbit");
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new Error(`Failed to disconnect Fitbit: ${response.status} - ${errorText}`);
       }
 
       return true;
     } catch (error) {
       console.error("Error disconnecting Fitbit:", error);
+      toast({
+        title: "Error",
+        description: "Failed to disconnect your Fitbit account. Please try again.",
+        variant: "destructive",
+      });
       return false;
     }
   }
