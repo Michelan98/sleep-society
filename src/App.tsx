@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { authService } from "@/lib/auth-service";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 // Pages
 import Index from "./pages/Index";
@@ -54,38 +56,40 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            
-            {/* Auth routes */}
-            <Route path="/login" element={
-              <AuthRoute>
-                <Login />
-              </AuthRoute>
-            } />
-            <Route path="/signup" element={
-              <AuthRoute>
-                <SignUp />
-              </AuthRoute>
-            } />
-            
-            {/* Protected routes */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            
-            {/* Catch all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <SidebarProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              
+              {/* Auth routes */}
+              <Route path="/login" element={
+                <AuthRoute>
+                  <Login />
+                </AuthRoute>
+              } />
+              <Route path="/signup" element={
+                <AuthRoute>
+                  <SignUp />
+                </AuthRoute>
+              } />
+              
+              {/* Protected routes */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              
+              {/* Catch all */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </SidebarProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

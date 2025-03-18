@@ -12,13 +12,14 @@ class FitbitService {
   validateState = fitbitAuthService.validateState.bind(fitbitAuthService);
   exchangeCodeForToken = fitbitAuthService.exchangeCodeForToken.bind(fitbitAuthService);
   disconnectFitbit = fitbitAuthService.disconnectFitbit.bind(fitbitAuthService);
-
+  
   // Data-related methods
   getSleepData = fitbitDataService.getSleepData.bind(fitbitDataService);
 
   // Sync-related methods
   getLastSyncTime = fitbitSync.getLastSyncTime.bind(fitbitSync);
   shouldSync = fitbitSync.shouldSync.bind(fitbitSync);
+  updateLastSyncTime = fitbitSync.updateLastSyncTime.bind(fitbitSync);
 }
 
 export const fitbitService = new FitbitService();
